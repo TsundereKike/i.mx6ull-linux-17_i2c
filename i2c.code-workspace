@@ -4,5 +4,9 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"bsp_ap3216c.h": "c"
+		}
+	}
 }

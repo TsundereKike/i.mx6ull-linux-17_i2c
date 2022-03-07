@@ -12,6 +12,8 @@
 #include "bsp_lcd.h"
 #include "bsp_lcdapi.h"
 #include "bsp_rtc.h"
+#include "bsp_i2c.h"
+#include "bsp_ap3216c.h"
 unsigned char led_state = OFF;
 char buf[160];
 rtc_date_time_t rtcdate;
@@ -33,7 +35,8 @@ int main(void)
 
     lcd_show_string(10,10,360,32,32,"this tmh's rtc test");
     memset(buf,0,sizeof(buf));
-
+    
+    ap3216_init();
 	while(1)					
 	{	
 		rtc_get_date_time(&rtcdate);
