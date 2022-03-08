@@ -17,6 +17,7 @@
 unsigned char led_state = OFF;
 char buf[160];
 rtc_date_time_t rtcdate;
+unsigned int IR, PS,ALS;
 int main(void)
 {
 
@@ -33,10 +34,14 @@ int main(void)
     lcd_init();
     rtc_init();
 
-    lcd_show_string(10,10,360,32,32,"this tmh's rtc test");
+    lcd_show_string(10,10,360,32,32,"this tmh's i2c test");
     memset(buf,0,sizeof(buf));
     
-    ap3216_init();
+    while(ap3216_init())
+    {
+        printf("please check ap3216c connect!!!");
+        lcd_show_string(10,43,400,32,32,"please check ap3216c connect!!!");
+    }
 	while(1)					
 	{	
 		rtc_get_date_time(&rtcdate);
@@ -44,9 +49,15 @@ int main(void)
         lcd_fill(50,110,300,126,LCD_WHITE);
         lcd_show_string(50, 110, 250, 16, 16,(char*)buf);  /* 显示字符串 */
 		
+
+        ap3216c_data_get(&IR,&ALS,&PS);
+        sprintf(buf,"IR=%dALS=%dPS=%d",IR, ALS, PS);
+        lcd_fill(50,130,300,146,LCD_WHITE);
+        lcd_show_string(50, 130, 250, 16, 16,(char*)buf);  /* 显示字符串 */
+
         led_state = !led_state;
         led_switch(LED0,led_state);
-        delay_ms(1000);
+        delay_ms(500);
     }
     return 0;
 }

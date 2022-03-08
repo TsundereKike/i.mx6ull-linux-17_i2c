@@ -3,7 +3,7 @@
 #include "bsp_gpio.h"
 #include "bsp_delay.h"
 #include "stdio.h"
-void ap3216_init(void)
+unsigned char ap3216_init(void)
 {
     unsigned char val = 0;
     /*引脚gpio初始化*/
@@ -19,7 +19,14 @@ void ap3216_init(void)
     delay_ms(50);
     ap3216c_write_one_byte(AP3216C_ADDR, AP3216C_SYSTEM_CONFIG, 0X03);/*设置ap3216c工作模式*/
     val = ap3216c_read_one_byte(AP3216C_ADDR, AP3216C_SYSTEM_CONFIG);
-    printf("ap3216c's system reg = %#x\r\n",val);
+    if(val==0x03)
+    {
+        return AP32163_IS_OK;
+    }
+    else
+    {
+        return AP3216C_IS_NOT_OK;
+    }
 }
 /*ap3216c读取一字节数据,返回值为读取到的数据*/
 unsigned char ap3216c_read_one_byte(unsigned char addr, unsigned char reg)
@@ -50,4 +57,25 @@ unsigned char ap3216c_write_one_byte(unsigned char addr, unsigned char reg,unsig
     xfer.data = &write_data;
     xfer.dataSize = 1;
     return(i2c_master_transfer(I2C1, &xfer));
+}
+/*获取AP3216C传感器数据*/
+void ap3216c_data_get(unsigned int *ir,unsigned int *als,unsigned int *ps)
+{
+    unsigned char data[6] = {0};
+    int i =0;
+    for(i=0;i<6;i++)
+    {
+        data[i] = ap3216c_read_one_byte(AP3216C_ADDR,AP3216C_IR_DATA_LOW + i);
+    }
+    if(data[0] & 0x80)
+    {
+        *ir = 0;
+        *ps = 0;
+    }
+    else
+    {
+        *ir = ((unsigned int)data[1]<<2) | ((unsigned int)data[0] & 0x03);
+        *ps = (((unsigned int)data[5] & 0x3f)<<4) | ((unsigned int)data[4] & 0x0f);
+    }
+    *als = ((unsigned int)data[3]<<8) | ((unsigned int)data[2]);    
 }
